@@ -13,7 +13,11 @@ app.set('views', __dirname);
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.post('/webhook', function (req, res) {
+app.get('/', (req, res) => {
+  res.send('kodo webhook ok');
+});
+
+app.post('/webhook', (req, res) => {
   webhook(req, res, 'webhook', '/home/kodo/github-webhook');
 });
 
