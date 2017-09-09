@@ -32,7 +32,7 @@ handler.on('push', function (event) {
   switch(event.path) {
     case '/webhook':
       update('/home/kodo/github-webhook', () => {
-        process.exec('npm run build && npm run restart', { 'cwd': '/home/kodo/github-webhook' }, function (error) {
+        process.exec('npm run restart', { 'cwd': '/home/kodo/github-webhook' }, function (error) {
           if (error) {
             console.log(`fail!!!\n${error}`);
           } else {
