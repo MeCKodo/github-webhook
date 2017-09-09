@@ -18,7 +18,7 @@ handler.on('error', function (err) {
 http.createServer(function (req, res) {
   handler(req, res, function (err) {
     res.statusCode = 404;
-    res.end('no such location');
+    res.end('no such location test');
   })
 }).listen(4000);
 
