@@ -3,8 +3,17 @@
  */
 const process = require('child_process');
 const http = require('http');
-const createHandler = require('github-webhook-handler');
-const handler = createHandler({ path: '/webhook', secret: 'webhook' });
+const createHandler = require('node-github-webhook');
+const handler = createHandler([
+  {
+    path: '/webhook',
+    secret: 'webhook'
+  },
+]);
+
+handler.on('error', function (err) {
+  console.error('Error:', err.message)
+});
 
 http.createServer(function (req, res) {
   handler(req, res, function (err) {
@@ -13,23 +22,32 @@ http.createServer(function (req, res) {
   })
 }).listen(4000);
 
-handler.on('error', function (err) {
-  console.error('Error:', err.message)
-});
 
 handler.on('push', function (event) {
-  console.log('Received a push event for %s to %s',
+  console.log(
+    'Received a push event for %s to %s',
     event.payload.repository.name,
-    event.payload.ref);
-  update('/home/kodo/github-webhook', () => {
-    process.exec('npm run build && npm run restart', { 'cwd': '/home/kodo/github-webhook' }, function (error) {
-      if (error) {
-        console.log(`fail!!!\n${error}`);
-      } else {
-        console.log('npm run restart 执行成功');
-      }
-    });
-  })
+    event.payload.ref
+  );
+  switch(event.path) {
+    case '/webhook':
+      update('/home/kodo/github-webhook', () => {
+        process.exec('npm run build && npm run restart', { 'cwd': '/home/kodo/github-webhook' }, function (error) {
+          if (error) {
+            console.log(`fail!!!\n${error}`);
+          } else {
+            console.log('npm run restart 执行成功');
+          }
+        });
+      });
+      break;
+    case '/webhook2':
+      // do sth about webhook2
+      break;
+    default:
+      // do sth else or nothing
+      break;
+  }
 });
 
 function update(cwd, callback) {
