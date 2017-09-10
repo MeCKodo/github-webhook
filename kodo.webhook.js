@@ -18,12 +18,13 @@ handler.on('error', function (err) {
 http.createServer(function (req, res) {
   handler(req, res, function (err) {
     res.statusCode = 404;
-    res.end('no such location test 2');
+    res.end('no such location test 3');
   })
 }).listen(4000);
 
 
 handler.on('push', function (event) {
+  let cwd, cmd;
   console.log(
     'Received a push event for %s to %s',
     event.payload.repository.name,
@@ -31,26 +32,33 @@ handler.on('push', function (event) {
   );
   switch(event.path) {
     case '/webhook':
-      update('/home/kodo/github-webhook', () => {
-        process.exec('npm run restart', { 'cwd': '/home/kodo/github-webhook' }, function (error) {
-          if (error) {
-            console.log(`fail!!!\n${error}`);
-          } else {
-            console.log('npm run restart 执行成功');
-          }
-        });
-      });
+      cwd = '/home/kodo/github-webhook';
+      cmd = 'npm run restart';
+      restart(cwd, cmd);
       break;
-    case '/webhook2':
-      // do sth about webhook2
+    case '/kodo-website':
+      cwd = '/home/kodo/kodo-website';
+      cmd = 'npm run restart';
+      restart(cwd, cmd);
       break;
     default:
-      // do sth else or nothing
       break;
   }
 });
 
-function update(cwd, callback) {
+function restart(cwd, execCmd) {
+  gitPull(cwd, () => {
+    process.exec(execCmd, { cwd }, function (error) {
+      if (error) {
+        console.log(`构建失败!!!\n${error}`);
+      } else {
+        console.log('构建执行成功！');
+      }
+    });
+  });
+}
+
+function gitPull(cwd, callback) {
   process.exec('git pull', { 'cwd': cwd }, function (error, stdout, stderr) {
     console.log('stdout========================\n' + stdout);
     console.log('stderr========================\n' + stderr);
